@@ -1,12 +1,44 @@
+package services
+
 import (
-	"log"
-	"strconv" // new import
-	"net/http"
 	"encoding/json"
-	"github.com/jinzhu/gorm"
-	"github.com/gorilla/mux" // new import
 	"library/models"
+	"log"
+	"net/http"
+	"strconv" // new import
+
+	"github.com/gorilla/mux" // new import
+	"gorm.io/gorm"
 )
+
+var dbconn *gorm.DB
+
+type Response struct {
+	Data    []models.Post `json:"data"`
+	Message string        `json:"message"`
+}
+
+func GetAllPosts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var posts = models.GetPosts()
+	var resp Response
+	err := dbconn.Find(&posts).Error
+	if err == nil {
+		log.Println(posts)
+		resp.Data = posts
+		resp.Message = "SUCCESS"
+		json.NewEncoder(w).Encode(&resp)
+	} else {
+		log.Println(err)
+		http.Error(w, err.Error(), 400)
+	}
+}
+
+func SetDB(db *gorm.DB) {
+	dbconn = db
+	var post = models.GetPost()
+	dbconn.AutoMigrate(&post)
+}
 
 func GetPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -45,17 +77,17 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
+	// params := mux.Vars(r)
 	var resp Response
 	var post = models.GetPost()
 	_ = json.NewDecoder(r.Body).Decode(&post)
-	id, _ := strconv.Atoi(params["id"])
+	// id, _ := strconv.Atoi(params["id"])
 
-	err := dbconn.Model(&post).Where("id = ?", id).Update(&post).Error
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
+	// err := dbconn.Model(&post).Where("id = ?", id).Update(&post).Error
+	// if err != nil {
+	// 	http.Error(w, err.Error(), 400)
+	// 	return
+	// }
 
 	resp.Message = "UPDATED"
 	json.NewEncoder(w).Encode(resp)
