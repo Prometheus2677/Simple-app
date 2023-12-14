@@ -5,10 +5,10 @@ import (
 	"library/models"
 	"log"
 	"net/http"
-	"strconv" // new import
+	"strconv"
 
-	"github.com/gorilla/mux" // new import
-	"gorm.io/gorm"
+	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 )
 
 var dbconn *gorm.DB
@@ -57,7 +57,6 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 	}
 }
-
 func CreatePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -74,25 +73,23 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	resp.Message = "CREATED"
 	json.NewEncoder(w).Encode(resp)
 }
-
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// params := mux.Vars(r)
+	params := mux.Vars(r)
 	var resp Response
 	var post = models.GetPost()
 	_ = json.NewDecoder(r.Body).Decode(&post)
-	// id, _ := strconv.Atoi(params["id"])
+	id, _ := strconv.Atoi(params["id"])
 
-	// err := dbconn.Model(&post).Where("id = ?", id).Update(&post).Error
-	// if err != nil {
-	// 	http.Error(w, err.Error(), 400)
-	// 	return
-	// }
+	err := dbconn.Model(&post).Where("id = ?", id).Update(&post).Error
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
 
 	resp.Message = "UPDATED"
 	json.NewEncoder(w).Encode(resp)
 }
-
 func DeletePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
