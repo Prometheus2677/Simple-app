@@ -14,7 +14,7 @@ func main() {
 	services.SetDB(db)
 	var appRouter = routes.CreateRouter()
 
-	log.Println("Listening on Port 8000")
-	log.Fatal(http.ListenAndServe(":8000", appRouter))
+	log.Println("Listening on Port 8080")
+	log.Fatal(http.ListenAndServe(":8080", appRouter))
 
 }
